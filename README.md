@@ -5,7 +5,7 @@ FileMaker tools for Angular
 
 Allows angular to communicate with a FileMaker XML Publishing instance running on the same machine.
 
-  fmangular.findAll({'-db': 'Tasks', '-lay': 'TasksList'}).then(function (found) {
+    fmangular.findAll({'-db': 'Tasks', '-lay': 'TasksList'}).then(function (found) {
 		$scope.tasks = found;
 		
 		var firstTask = $scope.tasks[0];
