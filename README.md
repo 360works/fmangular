@@ -63,15 +63,16 @@ Issues a `-new` post request.
 #fmangular.ui
 This module contains handy FileMaker-specific Angular directives.
 
-#fm-container
+##fm-container
 Container field with drag-and-drop editing support.
 
     <div class="fm-container" ng-model="myRecord.myContainerField"></div>
 
 When a file is dragged over an fm-container element an `active` class is added to the element. (This should be customizable in a future release)
 
-## Example CSS for a container field
+### Example CSS for a container field
 	
+````css
 	.fm-container {
 		width: 70px;
 		height: 70px;
@@ -92,9 +93,11 @@ When a file is dragged over an fm-container element an `active` class is added t
 	.fm-container.active {
 		border-color:red;
 	}
+````
 	
+### Handling uploaded files
 When a file is dropped onto an fm-container element, a data URL for the dropped file is written to the ng-model's value. When $save is called on your record object, this will write the base64-encoded data URL to the FileMaker container. 
-The following auto-enter calculation will convert a data URL to a container field.
+The following auto-enter calculation will convert a data URL to a container field. Note that the mime-type is used as the file name. TODO: A future release should preserve filenames. 
 
 	/** Convert data URL e.g. "data:image/jpeg;base64,/9j/4AA..." to a container by Base64 decoding the URL */	
 	If ( Left ( Self ; 5 ) ≠ "data:" ; Self ;
