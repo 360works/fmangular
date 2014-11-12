@@ -11,9 +11,13 @@
   ],
   "license": "MIT",
   "homepage": "http://360works.com",
-  "private": false,
   "ignore": [
     "demo",
-    "test"
-  ]
+    "test",
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "tests"
+  ],
+  "main": "src/fmangular.js"
 }
