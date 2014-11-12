@@ -1,0 +1,25 @@
+form input.ng-invalid.ng-dirty {
+	background-color: #FA787E;
+}
+
+.fm-container {
+	width: 70px;
+	height: 70px;
+	border: 1px dashed silver;
+	background-color: white;
+	overflow: hidden;
+	white-space: nowrap;
+	text-align: center;
+	display: table-cell;
+	vertical-align: middle;
+}
+
+
+.fm-container img {
+    max-height: 100%;
+    max-width: 100%;
+}
+
+.fm-container.active {
+	border-color:red;
+}

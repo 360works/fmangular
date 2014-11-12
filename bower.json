@@ -1,0 +1,19 @@
+{
+  "name": "fmAngular",
+  "version": "0.0.2",
+  "authors": [
+    "Sam Barnum <sam@360works.com>"
+  ],
+  "description": "Allows Angular to communicate with FileMaker via XML Web Publishing",
+  "keywords": [
+    "FileMaker",
+    "Angular"
+  ],
+  "license": "MIT",
+  "homepage": "http://360works.com",
+  "private": false,
+  "ignore": [
+    "demo",
+    "test"
+  ]
+}

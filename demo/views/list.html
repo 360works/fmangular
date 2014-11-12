@@ -1,0 +1,37 @@
+<ol class="breadcrumb">
+    <li><a href="#">Home</a></li>
+    <li class="active">Tasks</li>
+</ol>
+
+
+<h3>{{tasks.length}} Task<span ng-show="tasks.length != 1">s</span>
+    <button ng-click="newTask()" class="btn btn-sm btn-primary pull-right">Add New Task</button>
+</h3>
+
+<input type="search" ng-model="$root.taskFilter"/>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th ng-click="$root.taskSortBy='task'">Task</th>
+        <th ng-click="$root.taskSortBy='dueDate'">Due Date</th>
+        <th ng-click="$root.taskSortBy='status'">Status</th>
+        <th ng-click="$root.taskSortBy='category'">Category</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="t in tasks | filter: $root.taskFilter | orderBy:$root.taskSortBy">
+        <td><a href="#/tasks/{{t.$recid}}">{{t.task || '[Untitled]'}}</a></td>
+        <td>{{t.dueDate | date}}</td>
+        <td>{{t.status}}</td>
+        <td><span ng-repeat="c in t.category | filter: notEmpty track by $index "
+                  ng-click="$root.taskFilter=c"
+                  class="label label-primary"
+                  style="margin-right:3px;"
+                >{{c}}</span>
+        </td>
+    </tr>
+    </tbody>
+
+</table>
+

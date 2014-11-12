@@ -1,0 +1,121 @@
+<ol class="breadcrumb">
+    <li><a href="#">Home</a></li>
+    <li><a href="#/tasks">Tasks</a></li>
+    <li class="active">{{task.task}}</li>
+</ol>
+
+<form name="myForm">
+    <!-- FIELDS -->
+    <div class="row">
+        <div class="form-group col-sm-6">
+            <label>Task</label>
+            <input class="form-control" ng-model="task.task" required/>
+        </div>
+
+        <div class="form-group col-sm-3 col-xs-6">
+            <label>Status</label>
+            <select class="form-control" ng-model="task.status" ng-options="o.value as o.display for o in valueLists.status"></select>
+        </div>
+
+        <div class="form-group col-sm-3 col-xs-6">
+            <label>Due Date</label>
+            <input type="date" class="form-control" ng-model="task.dueDate"/>
+        </div>
+
+    </div>
+
+    <div class="form-group">
+        <label>Categories
+            <button ng-click="addCategory()" class="btn btn-primary btn-xs">Add Category</button></label>
+
+        <div class="row">
+            <div ng-repeat="c in task.category track by $index" class="col-sm-3 col-xs-4">
+                <select class="form-control" ng-model="task.category[$index]" ng-options="o.value as o.display for o in valueLists.category"></select>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <label>Description</label>
+        <textarea class="form-control" ng-model="task.description" rows="4"></textarea>
+    </div>
+
+    <div class="row">
+
+        <!-- Assignee panel -->
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <button ng-click="addAssignee()" class="btn btn-primary btn-xs pull-right">Add Assignee</button>
+                    <h3 class="panel-title">Assignees </h3>
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="a in task.assignees">
+                        <td><input ng-model="a.name" class="form-control"/></td>
+                        <td><input type="email" ng-model="a.email" class="form-control"/></td>
+                        <td><input type="tel" ng-model="a.phone" class="form-control"/></td>
+                    </tr>
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        <!-- Attachments panel -->
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <button ng-click="addAttachment()" class="btn btn-primary btn-xs pull-right">Add Attachment</button>
+                    <h3 class="panel-title">Attachments</h3>
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th style="width:80px;">Attachment</th>
+                        <th>Comments</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="a in task.attachments">
+                        <td>
+                            <div class="fm-container" ng-model="a.attachmentContainer" height="64" dragOverClass="'dragOverClass'">Upload a file</div>
+                        </td>
+                        <td><textarea rows="3" ng-model="a.comments" class="form-control"></textarea></td>
+                    </tr>
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+    <p class="small pull-right">
+        Created on {{task.created | date : 'medium'}} by {{task.createdBy}}<br/>
+        Modified on {{task.modified | date : 'medium'}} by {{task.modifiedBy}}
+    </p>
+
+    <button ng-click="save()" ng-disabled="myForm.$pristine" class="btn btn-primary">Save</button>
+    <button ng-click="deleteRecord()" class="btn btn-danger">Delete</button>
+
+</form>
+<hr/>
+
+<!--
+<h3>Debug Stuff</h3>
+
+<p>
+    This record has been modified {{task.$modid}} time(s). Its recid is {{task.$recid}}
+</p>
+<p></p>
+<pre>{{task | json}}</pre>-->
