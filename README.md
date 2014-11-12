@@ -3,6 +3,8 @@
 FMAngular Allows Angular to communicate with a FileMaker XML Publishing instance running on the same machine.
 
 FMAngular converts FileMaker XML with potentially unusable field names to JavaScript objects with `$recid` and `$modid` attributes as well as `$save()` and `$delete()` methods.
+
+FileMaker dates and timestamps are parsed into native JavaScript `Date` objects, which allows correct sorting behavior. Time values are currently left as-is.
  
 ## Sample Usage:
 
@@ -60,6 +62,9 @@ Issues a `-findQuery` post request. Consult the XML publishing guide for details
 ##new(parameters)
 Issues a `-new` post request.
 
+##layout(dbName, layoutName)
+Returns a promise containing metadata about the given layout (currently only `valueLists` by name). (Thanks to Michael Wallace from rcconsulting.com for contributions here.)
+
 #fmangular.ui
 This module contains handy FileMaker-specific Angular directives.
 
@@ -96,19 +101,26 @@ When a file is dragged over an fm-container element an `active` class is added t
 ````
 	
 ### Handling uploaded files
-When a file is dropped onto an fm-container element, a data URL for the dropped file is written to the ng-model's value. When $save is called on your record object, this will write the base64-encoded data URL to the FileMaker container. 
-The following auto-enter calculation will convert a data URL to a container field. Note that the mime-type is used as the file name. TODO: A future release should preserve filenames. 
+When a file is dropped onto an fm-container element, an object whose src is the data URL for the dropped file is written to the ng-model's value. When $save is called on your record object, this will write three newline-delimited values to the FileMaker container. These values are:
 
-	/** Convert data URL e.g. "data:image/jpeg;base64,/9j/4AA..." to a container by Base64 decoding the URL */	
-	If ( Left ( Self ; 5 ) ≠ "data:" ; Self ;
-		Let([
-			mimeType = Middle ( Self ; 6 ; Position ( Self ; ";" ; 1  ; 1 ) - 6 ) ;
-			fileName = Substitute ( mimeType ; "/" ; "." ) ;
-			payload = Middle( Self ; Position ( Self ; "," ; 1 ; 1 ) + 1 ; 99999999999999 )
-		] ;
-		Base64Decode( payload ; fileName )
+* fmAngularContainer (a literal string)
+* the file name
+* base64-encoded file contents
+
+The following auto-enter calculation will convert these three values to a native FileMaker container field, preserving the file name. 
+
+	/** Convert fmAngularContainer to a FileMaker container by Base64 decoding the payload */
+	
+	If ( 
+		getvalue ( Self ; 1 ) ≠ "fmAngularContainer" ; 
+			Self ;
+			Let([
+				fileName = GetValue ( self ; 2 ) ;
+				payload = MiddleValues( Self ; 3 ; 99999999999999 )
+			] ;
+			Base64Decode( payload ; fileName )
 		)
 	)
-
+	
 In addition, the fm-container element supports keyboard focus. Pressing `delete` or `backspace` while focused will clear the ng-model's value.
 
