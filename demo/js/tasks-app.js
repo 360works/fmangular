@@ -22,14 +22,14 @@ app.config(function ($routeProvider) {
 
 /** List view controller */
 app.controller('ListCtrl', function ($scope, fmangular, $location) {
-	fmangular.findAll({'-db': 'Tasks', '-lay': 'Tasks'}).then(function (found) {
+	fmangular.findAll({'-db': 'Tasks_FMAngular', '-lay': 'Tasks'}).then(function (found) {
 		$scope.tasks = found;
 	}, function(err) {
 		alert('Could not fetch list of tasks: ' + err.message);
 	});
 
 	$scope.newTask = function () {
-		fmangular.new({ '-db': 'Tasks', '-lay': 'Tasks', task: 'My New Task'}).then(function (newTask) {
+		fmangular.new({ '-db': 'Tasks_FMAngular', '-lay': 'Tasks', task: 'My New Task'}).then(function (newTask) {
 			$location.path('/tasks/' + newTask.$recid);
 		});
 	};
@@ -44,10 +44,10 @@ app.controller('ListCtrl', function ($scope, fmangular, $location) {
 app.controller('DetailCtrl', function ($scope, $routeParams, $location, fmangular) {
 	// important to fetch valueLists before fetching the record, so the correct option is selected.
 	// alternately, hard-code your value lists
-	fmangular.layout('Tasks', 'Task Details').then(function (layout) {
+	fmangular.layout('Tasks_FMAngular', 'Task Details').then(function (layout) {
 		$scope.valueLists = layout.valueLists;
 	}).then(function() {
-		return fmangular.find({'-db': 'Tasks', '-lay': 'Task Details', '-recid': $routeParams.id});
+		return fmangular.find({'-db': 'Tasks_FMAngular', '-lay': 'Task Details', '-recid': $routeParams.id});
 	}).then(function (found) {
 		$scope.task = found[0];
 	}, function (err) {
@@ -60,25 +60,18 @@ app.controller('DetailCtrl', function ($scope, $routeParams, $location, fmangula
 	};
 
 	$scope.addAssignee = function () {
-		$scope.task.assignees.push({name: ''});
-		$scope.save();
+		$scope.task.$performScript('Add Assignee [+]').then(handleSuccessfulSave, handleError)
 	};
 
 	$scope.addAttachment = function () {
-		$scope.task.attachments.push({comments: ''});
-		$scope.save();
+		$scope.task.$performScript('Add Attachment [+]').then(handleSuccessfulSave, handleError)
 	};
 
 	$scope.save = function () {
 		if ($scope.myForm.$invalid) {
 			return alert('You must fix all validation errors first!')
 		}
-		$scope.task.$save().then(function (updated) {
-			$scope.task = updated
-			$scope.myForm.$setPristine()
-		}).catch(function (error) {
-			alert('Oops! Save failed: ' + error.message || error);
-		})
+		$scope.task.$save().then(handleSuccessfulSave, handleError)
 	};
 
 	$scope.deleteRecord = function () {
@@ -88,5 +81,14 @@ app.controller('DetailCtrl', function ($scope, $routeParams, $location, fmangula
 		}).catch(function (error) {
 			alert('Could not delete task: ' + error.message)
 		})
+	};
+
+	function handleSuccessfulSave(updated) {
+		$scope.task = updated;
+		$scope.myForm.$setPristine()
+	}
+
+	function handleError(error) {
+		alert('Oops! An error occurred while communicating with the database: ' + error.message || error)
 	}
 });

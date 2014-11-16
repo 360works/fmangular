@@ -131,11 +131,61 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 					return angular.element(response.data);
 				}
 
+				function errorMessageFor(errorCode) {
+					switch(errorCode) {
+						case 2: return 'Memory error';
+						case 3: return 'Command is unavailable (for example, wrong operating system, wrong mode, etc.)';
+						case 4: return 'Command is unknown';
+						case 5: return 'Command is invalid (for example, a Set Field script step does not have a calculation specified)';
+						case 6: return 'File is read-only';
+						case 7: return 'Running out of memory';
+						case 8: return 'Empty result';
+						case 9: return 'Insufficient privileges';
+						case 10: return 'Requested data is missing';
+						case 11: return 'Name is not valid';
+						case 100: return 'File is missing';
+						case 101: return 'Record is missing';
+						case 102: return 'Field is missing';
+						case 103: return 'Relationship is missing';
+						case 104: return 'Script is missing';
+						case 105: return 'Layout is missing';
+						case 106: return 'Table is missing';
+						case 200: return 'Record access is denied';
+						case 201: return 'Field cannot be modified';
+						case 202: return 'Field access is denied';
+						case 300: return 'File is locked or in use';
+						case 301: return 'Record is in use by another user';
+						case 302: return 'Table is in use by another user';
+						case 303: return 'Database schema is in use by another user';
+						case 304: return 'Layout is in use by another user';
+						case 306: return 'Record modification ID does not match';
+						case 400: return 'Find criteria are empty';
+						case 500: return 'Date value does not meet validation entry options';
+						case 501: return 'Time value does not meet validation entry options';
+						case 502: return 'Number value does not meet validation entry options';
+						case 503: return 'Value in field is not within the range specified in validation entry options';
+						case 504: return 'Value in field is not unique as required in validation entry options';
+						case 505: return 'Value in field is not an existing value in the database file as required in validation entry options';
+						case 506: return 'Value in field is not listed on the value list specified in validation entry option';
+						case 507: return 'Value in field failed calculation test of validation entry option';
+						case 508: return 'Invalid value entered in Find mode';
+						case 509: return 'Field requires a valid value';
+						case 800: return 'Unable to create file on disk';
+						case 801: return 'Unable to create temporary file on System disk';
+						case 802: return 'Unable to open file.';
+						case 8003: return 'Record is locked by another user.';
+						default: return 'FileMaker web publishing engine returned an error code ' + errorCode;
+					}
+				}
+
 				function parseLayoutXml(response) {
 					var doc = docForResponse(response);
 					var errorcode = doc.find('errorcode');
 					if (!errorcode || !errorcode.length) throw {message:'Response from server is not a valid layout document'};
-					if (errorcode[0].textContent !== '0') throw {message:'FileMaker web publishing engine returned an error code ' + errorcode[0].textContent};
+					if (errorcode[0].textContent !== '0') {
+						var errorCodeNum = parseInt(errorcode[0].textContent);
+						throw {message:errorMessageFor(errorCodeNum),code:errorCodeNum};
+					}
 					var result = {valueLists:{}};
 
 					var valueLists = doc.find('valuelist');
@@ -159,17 +209,22 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 					var doc = docForResponse(response);
 					var error = doc.find('error');
 					if (!error) throw {message:'Response from server is not a valid resultset document'};
-					if (error.attr('code') !== '0') throw {message: 'FileMaker web publishing engine returned an error code ' + error.attr('code')};
+					if (error.attr('code') !== '0') {
+						var errorCodeNum = parseInt(error.attr('code'));
+						throw {message: errorMessageFor(errorCodeNum), code:errorCodeNum};
+					}
 					var datasource = doc.find('datasource');
 					var db = datasource.attr('database');
 					var layout = datasource.attr('layout');
 					var resultset = doc.find('resultset')[0];
 
-					function _save() {
+					var _save = function(additionalArgs) {
 						var rec = this;
-						console.log('Saving record to ' + db + ', ' + layout);
 						return schemaPromiseFor(db, layout).then(function (schema) {
 							var data = '-db=' + encodeURIComponent(db) + '&-lay=' + encodeURIComponent(layout) + '&-recid=' + rec.$recid + '&-modid=' + rec.$modid + '&-edit';
+							angular.forEach(additionalArgs, function (fv, fk) {
+								data += '&' + encodeURIComponent(fk) + '=' + encodeURIComponent(fv);
+							});
 							angular.forEach(schema.fields, function (fv, fk) {
 								data = appendToPostData(data, fv, rec[fk], null, schema);
 							});
@@ -192,14 +247,20 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 									rec.$modid=updatedRecord.$modid;
 									return  updatedRecord
 								});
-					}
+					};
 
-					function _delete() {
+					var _delete = function() {
 						var rec = this;
-						console.log('Deleting record ' + db + ', ' + layout + ' ' + rec.$recid);
 						var data = '-db=' + encodeURIComponent(db) + '&-lay=' + encodeURIComponent(layout) + '&-recid=' + rec.$recid + '&-modid=' + rec.$modid + '&-delete';
 						return $http.post('/fmi/xml/fmresultset.xml', data).then(parseResponse);
-					}
+					};
+
+					var _scriptInvoker = (function(db, layout, parseFn) {
+						return function(script, parameter) {
+							return this.$save({'-script':script,'-script.param':parameter});
+						};
+					})(db, layout, parseResponse);
+
 
 					var schemaKey = (db + '/' + layout);
 					var schema = _schemas[schemaKey];
@@ -208,7 +269,6 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 						schema.dateFormat = datasource.attr('date-format');
 						schema.timeFormat = datasource.attr('time-format');
 						schema.timestampFormat = datasource.attr('timestamp-format');
-						console.log('Parsed metadata for ' + schemaKey);
 					}
 
 					return parseRecords(resultset, '');
@@ -222,7 +282,8 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 								$recid: r.attributes['record-id'].value,
 								$modid: r.attributes['mod-id'].value,
 								$save: fmPortalName ? undefined : _save, // portals don't have methods
-								$delete: fmPortalName ? undefined : _delete // portals don't have methods
+								$delete: fmPortalName ? undefined : _delete, // portals don't have methods
+								$performScript: fmPortalName ? undefined : _scriptInvoker
 							};
 							for (var fieldOrPortal = r.firstChild; fieldOrPortal != null; fieldOrPortal = fieldOrPortal.nextSibling) {
 								if (fieldOrPortal.tagName == 'FIELD') {
@@ -370,7 +431,6 @@ angular.module('fmangular.ui', []).directive('fmContainer', function ($window) {
 			}
 
 			function drop(e) {
-				console.log('Dropped ' + e);
 				e.stopPropagation();
 				e.preventDefault();
 

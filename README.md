@@ -40,10 +40,10 @@ angular.module('your-app').controller('MainCtrl', function($scope, fmangular) {
 
 
 	
-#Methods
+#FMAngular Methods
 
 ##post(parameters)
-Sends raw POST request to the web publishing engine, parsing any resulting records. Most FMAngular methods are convenience wrappers around `post`.
+Sends raw POST request to the web publishing engine, parsing any resulting records. Most FMAngular methods are convenience wrappers around `post`. This returns a promise object containing an array of parsed record objects.
 
 At minimum, you will want to specify `-db` and `-lay` parameters as well as an action such as `-find`, `-edit`, etc. 
 
@@ -64,6 +64,18 @@ Issues a `-new` post request.
 
 ##layout(dbName, layoutName)
 Returns a promise containing metadata about the given layout (currently only `valueLists` by name). (Thanks to Michael Wallace from rcconsulting.com for contributions here.)
+
+#Record Methods
+Most FMAngular methods return a promise containing an array of Record objects. In addition to data attributes, Records have the following methods:
+
+## $save(optionalArgs)
+Will save the record to the database, returning a promise containing the updated record.
+
+## $delete()
+Will execute a `-delete` operation for the record.
+ 
+## $performScript(scriptName, scriptParam)
+Convenience method which saves the record, passing in a `-script` and optional `-script.param` as well. Returns a promise containing the updated record.
 
 #fmangular.ui
 This module contains handy FileMaker-specific Angular directives.
