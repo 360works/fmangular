@@ -1,10 +1,14 @@
 #FMAngular
 
-FMAngular Allows Angular to communicate with a FileMaker XML Publishing instance running on the same machine.
+Publish your FileMaker database to the web with no PHP back-end. Want to add a field? Just put it on your layout, and it will be available to your Angular app.
 
-FMAngular converts FileMaker XML with potentially unusable field names to JavaScript objects with `$recid` and `$modid` attributes as well as `$save()` and `$delete()` methods.
+For this to work, your Angular app must be hosted on the same machine as your FileMaker XML Publishing engine. Because the app and database are on the same host, there is very little configuration required to start using FMAngular.
+
+FMAngular converts FileMaker XML with potentially unusable field names to JavaScript objects with `$recid` and `$modid` attributes as well as `$save()`, `$delete()`, and `$performScript()` methods.
 
 FileMaker dates and timestamps are parsed into native JavaScript `Date` objects, which allows correct sorting behavior. Time values are currently left as-is.
+
+In addition, there is a handy `fm-container` directive that allows you to send upload data from the browser to FileMaker as a Base64-encoded string. 
  
 ## Sample Usage:
 
