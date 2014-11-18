@@ -1,4 +1,4 @@
-#FMAngular
+#FMAngular by [360Works](http://360works.com)
 
 Publish your FileMaker database to the web with no PHP back-end. Want to add a field? Just put it on your layout, and it will be available to your Angular app.
 
