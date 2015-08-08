@@ -20,6 +20,10 @@ app.config(function ($routeProvider) {
 	})
 });
 
+app.config(function(fmangularProvider){
+	fmangularProvider.url('http://linux.com');
+});
+
 /** List view controller */
 app.controller('ListCtrl', function ($scope, fmangular, $location) {
 	fmangular.findAll({'-db': 'Tasks_FMAngular', '-lay': 'Tasks'}).then(function (found) {

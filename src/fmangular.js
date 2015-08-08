@@ -1,5 +1,10 @@
 angular.module('fmangular', []).provider('fmangular', function fmangularProvider() {
 
+	var url = null;
+
+	this.url = function(newUrl) {
+		url = newUrl;
+	};
 
 	this.$get = [
 		'$http',
@@ -92,7 +97,8 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 				return value ? dateFilter(value, format) : '';
 			}
 
-			function FMAngular() {
+			function FMAngular(fmangularConfig) {
+				var baseUrl = fmangularConfig.url ? fmangularConfig.url : '';
 				var _schemas = {};
 
 				function schemaPromiseFor(db, layout) {
@@ -100,7 +106,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 					if (_schemas[key]) {
 						return $q.when(_schemas[key])
 					}
-					return $http.get('/fmi/xml/fmresultset.xml?-db=' + encodeURIComponent(db) + '&-lay=' + encodeURIComponent(layout) + '-view')
+					return $http.get(baseUrl + '/fmi/xml/fmresultset.xml?-db=' + encodeURIComponent(db) + '&-lay=' + encodeURIComponent(layout) + '-view')
 							.then(parseResponse)
 							.then(function () {
 								return _schemas[key]; // will have been set by parseResponse
@@ -261,7 +267,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 									})
 								})
 							});
-							return $http.post('/fmi/xml/fmresultset.xml', data, {headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+							return $http.post(baseUrl + '/fmi/xml/fmresultset.xml', data, {headers:{'Content-Type':'application/x-www-form-urlencoded'}});
 						})
 								.then(parseResponse)
 								.then(function (found) {
@@ -274,7 +280,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 					var _delete = function() {
 						var rec = this;
 						var data = '-db=' + encodeURIComponent(db) + '&-lay=' + encodeURIComponent(layout) + '&-recid=' + rec.$recid + '&-modid=' + rec.$modid + '&-delete';
-						return $http.post('/fmi/xml/fmresultset.xml', data).then(parseResponse);
+						return $http.post(baseUrl + '/fmi/xml/fmresultset.xml', data).then(parseResponse);
 					};
 
 					var _scriptInvoker = (function(db, layout, parseFn) {
@@ -347,7 +353,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 
 
 				this.post = function (url) {
-					var httpPromise = $http.post(url);
+					var httpPromise = $http.post(baseUrl + url);
 					return httpPromise.then(function (response) {
 						return parseResponse(response);
 					});
@@ -359,7 +365,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 				function createConvenienceMethod(names) {
 					angular.forEach(arguments, function (name) {
 						that[name] = function (params) {
-							var url = '/fmi/xml/fmresultset.xml?-' + name.toLowerCase();
+							var url = baseUrl + '/fmi/xml/fmresultset.xml?-' + name.toLowerCase();
 							var httpPromise = $http.get(url, {params: params});
 							var result = httpPromise.then(function (response) {
 								return parseResponse(response);
@@ -373,7 +379,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 				}
 
 				this.layout = function(db, lay) {
-					var url = '/fmi/xml/FMPXMLLAYOUT.xml?-view';
+					var url = baseUrl + '/fmi/xml/FMPXMLLAYOUT.xml?-view';
 					var httpPromise = $http.get(url, {params: {'-db':db,'-lay':lay}});
 					return httpPromise.then(function (response) {
 						return parseLayoutXml(response);
@@ -382,7 +388,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 
 			}
 
-			return new FMAngular();
+			return new FMAngular({url:url});
 		}
 	];
 });
