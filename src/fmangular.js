@@ -66,6 +66,28 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 				}
 			}
 
+			var parseNumber = function(value) {
+				if (""===value) return null;
+				if ("true"===value) return true;
+				if ("false"===value) return false;
+				if (value.indexOf('.')) return parseFloat(value);
+				return parseInt(value);
+			};
+
+			var parseText = function(value) {
+				return value;
+			};
+
+			var parsers = {
+				date: function(value, schema){return parseDate(value, schema.dateFormat)},
+				time: parseText,
+				timestamp: function(value, schema){return parseDate(value, schema.timestampFormat)},
+				number: parseNumber,
+				text: parseText
+			};
+
+
+
 			function formatDate(value, format) {
 				return value ? dateFilter(value, format) : '';
 			}
@@ -305,19 +327,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 									}
 									for (var data = fieldOrPortal.firstChild; data != null; data = data.nextSibling) {
 										var value = data.textContent;
-										switch(fieldDef.result) {
-											case 'date':
-												value = parseDate(value, schema.dateFormat);
-												break;
-											case 'timestamp':
-												value = parseDate(value, schema.timestampFormat);
-												break;
-											case 'container':
-												value = parseContainer(value);
-												break;
-										}
-										//object[fieldName] = value;
-										//$parse(fieldName).assign(object, value);
+										value = parsers[fieldDef.result](value, schema);
 										assignFn.call(this, object, value);
 									}
 								} else if (fieldOrPortal.tagName == 'RELATEDSET') {
