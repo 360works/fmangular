@@ -20,9 +20,10 @@ app.config(function ($routeProvider) {
 	})
 });
 
-app.config(function(fmangularProvider){
-	fmangularProvider.url('http://linux.com');
-});
+// to point FMAngular somewhere besides the local server:
+//app.config(function(fmangularProvider){
+//	fmangularProvider.url('http://other.server.com/custom/path');
+//});
 
 /** List view controller */
 app.controller('ListCtrl', function ($scope, fmangular, $location) {
