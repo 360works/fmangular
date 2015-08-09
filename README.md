@@ -51,7 +51,7 @@ angular.module('MyApp').config(function (fmangularProvider) {
 	// to set default credentials on FMAngular requests to server:
 	fmangularProvider.credentials('username', 'secret');
 });
-
+````
 
 
 	
