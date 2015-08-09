@@ -20,10 +20,13 @@ app.config(function ($routeProvider) {
 	})
 });
 
-// to point FMAngular somewhere besides the local server:
-//app.config(function(fmangularProvider){
-//	fmangularProvider.url('http://other.server.com/custom/path');
-//});
+app.config(function (fmangularProvider) {
+	// to point FMAngular somewhere besides the local server:
+	//	fmangularProvider.url('http://other.server.com/custom/path');
+	//
+	// to set default credentials on FMAngular requests to server:
+	//fmangularProvider.credentials('username', 'secret');
+});
 
 /** List view controller */
 app.controller('ListCtrl', function ($scope, fmangular, $location) {

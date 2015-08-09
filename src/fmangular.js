@@ -1,9 +1,14 @@
 angular.module('fmangular', []).provider('fmangular', function fmangularProvider() {
 
 	var url = null;
+	var credentials;
 
 	this.url = function(newUrl) {
 		url = newUrl;
+	};
+
+	this.credentials = function(username, password) {
+		credentials = {username:username, password:password};
 	};
 
 	this.$get = [
@@ -99,6 +104,10 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 
 			function FMAngular(fmangularConfig) {
 				var baseUrl = fmangularConfig.url ? fmangularConfig.url : '';
+				var httpHeaders = {};
+				if (fmangularConfig.credentials) {
+					httpHeaders.authorization = 'Basic ' + btoa(fmangularConfig.credentials.username + ':' + fmangularConfig.credentials.password);
+				}
 				var _schemas = {};
 
 				function schemaPromiseFor(db, layout) {
@@ -106,7 +115,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 					if (_schemas[key]) {
 						return $q.when(_schemas[key])
 					}
-					return $http.get(baseUrl + '/fmi/xml/fmresultset.xml?-db=' + encodeURIComponent(db) + '&-lay=' + encodeURIComponent(layout) + '-view')
+					return $http.get(baseUrl + '/fmi/xml/fmresultset.xml?-db=' + encodeURIComponent(db) + '&-lay=' + encodeURIComponent(layout) + '-view', {headers:httpHeaders})
 							.then(parseResponse)
 							.then(function () {
 								return _schemas[key]; // will have been set by parseResponse
@@ -267,7 +276,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 									})
 								})
 							});
-							return $http.post(baseUrl + '/fmi/xml/fmresultset.xml', data, {headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+							return $http.post(baseUrl + '/fmi/xml/fmresultset.xml', data, {headers:{'Content-Type':'application/x-www-form-urlencoded'}}, {headers:httpHeaders});
 						})
 								.then(parseResponse)
 								.then(function (found) {
@@ -280,7 +289,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 					var _delete = function() {
 						var rec = this;
 						var data = '-db=' + encodeURIComponent(db) + '&-lay=' + encodeURIComponent(layout) + '&-recid=' + rec.$recid + '&-modid=' + rec.$modid + '&-delete';
-						return $http.post(baseUrl + '/fmi/xml/fmresultset.xml', data).then(parseResponse);
+						return $http.post(baseUrl + '/fmi/xml/fmresultset.xml', data, {headers:httpHeaders}).then(parseResponse);
 					};
 
 					var _scriptInvoker = (function(db, layout, parseFn) {
@@ -353,7 +362,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 
 
 				this.post = function (url) {
-					var httpPromise = $http.post(baseUrl + url);
+					var httpPromise = $http.post(baseUrl + url, null, {headers:httpHeaders});
 					return httpPromise.then(function (response) {
 						return parseResponse(response);
 					});
@@ -366,7 +375,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 					angular.forEach(arguments, function (name) {
 						that[name] = function (params) {
 							var url = baseUrl + '/fmi/xml/fmresultset.xml?-' + name.toLowerCase();
-							var httpPromise = $http.get(url, {params: params});
+							var httpPromise = $http.get(url, {params: params, headers:httpHeaders});
 							var result = httpPromise.then(function (response) {
 								return parseResponse(response);
 							});
@@ -380,7 +389,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 
 				this.layout = function(db, lay) {
 					var url = baseUrl + '/fmi/xml/FMPXMLLAYOUT.xml?-view';
-					var httpPromise = $http.get(url, {params: {'-db':db,'-lay':lay}});
+					var httpPromise = $http.get(url, {params: {'-db':db,'-lay':lay}, headers:httpHeaders});
 					return httpPromise.then(function (response) {
 						return parseLayoutXml(response);
 					});
@@ -388,7 +397,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 
 			}
 
-			return new FMAngular({url:url});
+			return new FMAngular({url:url, credentials:credentials});
 		}
 	];
 });
