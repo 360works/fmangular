@@ -1,6 +1,6 @@
 {
   "name": "fmAngular",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "authors": [
     "Sam Barnum <sam@360works.com>"
   ],
@@ -11,6 +11,9 @@
   ],
   "license": "MIT",
   "homepage": "http://360works.com",
+  "dependencies": {
+    "angular": "~1.x"
+  },
   "ignore": [
     "demo",
     "test",

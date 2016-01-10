@@ -93,7 +93,8 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 				time: parseText,
 				timestamp: function(value, schema){return parseDate(value, schema.timestampFormat)},
 				number: parseNumber,
-				text: parseText
+				text: parseText,
+                container: parseContainer
 			};
 
 
@@ -276,7 +277,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 									})
 								})
 							});
-							return $http.post(baseUrl + '/fmi/xml/fmresultset.xml', data, {headers:{'Content-Type':'application/x-www-form-urlencoded'}}, {headers:httpHeaders});
+							return $http.post(baseUrl + '/fmi/xml/fmresultset.xml', data, {withCredentials:true, headers:{'Content-Type':'application/x-www-form-urlencoded'}}, {headers:httpHeaders});
 						})
 								.then(parseResponse)
 								.then(function (found) {
@@ -289,7 +290,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 					var _delete = function() {
 						var rec = this;
 						var data = '-db=' + encodeURIComponent(db) + '&-lay=' + encodeURIComponent(layout) + '&-recid=' + rec.$recid + '&-modid=' + rec.$modid + '&-delete';
-						return $http.post(baseUrl + '/fmi/xml/fmresultset.xml', data, {headers:httpHeaders}).then(parseResponse);
+						return $http.post(baseUrl + '/fmi/xml/fmresultset.xml', data, {withCredentials:true, headers:httpHeaders}).then(parseResponse);
 					};
 
 					var _scriptInvoker = (function(db, layout, parseFn) {
@@ -362,7 +363,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 
 
 				this.post = function (url) {
-					var httpPromise = $http.post(baseUrl + url, null, {headers:httpHeaders});
+					var httpPromise = $http.post(baseUrl + url, null, {withCredentials:true, headers:httpHeaders});
 					return httpPromise.then(function (response) {
 						return parseResponse(response);
 					});
