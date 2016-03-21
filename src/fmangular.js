@@ -80,7 +80,7 @@ angular.module('fmangular', []).provider('fmangular', function fmangularProvider
 				if (""===value) return null;
 				if ("true"===value) return true;
 				if ("false"===value) return false;
-				if (value.indexOf('.')) return parseFloat(value);
+				if (value.indexOf('.') != -1) return parseFloat(value);
 				return parseInt(value);
 			};
 
