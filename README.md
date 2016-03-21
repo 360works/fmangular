@@ -2,7 +2,7 @@
 
 Publish your FileMaker database to the web with no PHP back-end. Want to add a field? Just put it on your layout, and it will be available to your Angular app.
 
-For this to work, your Angular app must be hosted on the same machine as your FileMaker XML Publishing engine, or else use the `fmangularProvider.url()` method to specify an alternate URL. Be aware that pointing to another server will require setting `Access-Control` headers on the FileMaker server. If the app and database are on the same host, there is very little configuration required to start using FMAngular.
+For this to work, your Angular app must be hosted on the same machine as your FileMaker XML Publishing engine, or else use the `fmangularProvider.url()` method to specify an alternate URL. Be aware that pointing to another server will require setting `Access-Control` headers on the FileMaker server. If the app and database are on the same host, there is very little configuration required to start using FMAngular. Specific steps on setting these headers are discussed here: https://github.com/360works/fmangular/issues/4
 
 FMAngular converts FileMaker XML with potentially unusable field names to JavaScript objects with `$recid` and `$modid` attributes as well as `$save()`, `$delete()`, and `$performScript()` methods.
 
